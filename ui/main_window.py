@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QPushButton, QComboBox, QFrame, QGridLayout,
-    QColorDialog, QMenu, QToolButton
+    QColorDialog, QMenu, QToolButton, QApplication
 )
 from PySide6.QtCore import Qt, QTimer, QPoint, QSize
 from PySide6.QtGui import QColor, QPainter, QPalette
@@ -56,31 +56,33 @@ class MainWindow(QWidget):
         self.current_activity_color = "#888888"
         self.elapsed_seconds = 0
         self.drag_position = None
+        self.title_bar = None
+        self.content = None
         
         self._init_ui()
         self._load_previous_activities()
         self._restore_window_state()
     
     def _init_ui(self):
-        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setMinimumSize(280, 180)
+        self.setMouseTracking(True)
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(8, 8, 8, 8)
         main_layout.setSpacing(6)
         
-        title_bar = self._create_title_bar()
-        main_layout.addWidget(title_bar)
+        self.title_bar = self._create_title_bar()
+        main_layout.addWidget(self.title_bar)
         
-        content = QFrame()
-        content.setStyleSheet("""
+        self.content = QFrame()
+        self.content.setStyleSheet("""
             QFrame {
                 background-color: #f5f5f5;
                 border-radius: 8px;
             }
         """)
-        content_layout = QVBoxLayout(content)
+        content_layout = QVBoxLayout(self.content)
         content_layout.setContentsMargins(12, 12, 12, 12)
         content_layout.setSpacing(10)
         
@@ -165,7 +167,7 @@ class MainWindow(QWidget):
         button_layout.addStretch()
         content_layout.addLayout(button_layout)
         
-        main_layout.addWidget(content)
+        main_layout.addWidget(self.content)
         
         self.setStyleSheet("""
             QWidget {
@@ -177,7 +179,8 @@ class MainWindow(QWidget):
         title_bar = QFrame()
         title_bar.setStyleSheet("""
             QFrame {
-                background-color: transparent;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #0f0c29, stop:0.5 #302b63, stop:1 #24243e);
                 border-radius: 8px 8px 0 0;
             }
         """)
@@ -289,11 +292,16 @@ class MainWindow(QWidget):
         self.color_btn.set_color(color)
     
     def _pick_color(self):
-        dialog = QColorDialog(self)
+        dialog = QColorDialog(None)
         dialog.setWindowTitle("Select Color")
         dialog.setCurrentColor(QColor(self.current_activity_color))
         dialog.setOption(QColorDialog.DontUseNativeDialog)
-        dialog.setWindowFlags(Qt.Dialog | Qt.WindowStaysOnTopHint)
+        dialog.setWindowFlags(Qt.Dialog | Qt.WindowStaysOnTopHint | Qt.Window)
+        dialog.setStyleSheet("""
+            QDialog {
+                background-color: #DBCBF1;
+            }
+        """)
         
         if dialog.exec():
             self.current_activity_color = dialog.currentColor().name()
@@ -412,20 +420,28 @@ class MainWindow(QWidget):
     
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPosition().toPoint() - self.pos()
-            event.accept()
-    
+            self.drag_position = event.globalPos()
+            QApplication.instance().installEventFilter(self)
+
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton and self.drag_position:
-            new_pos = event.globalPosition().toPoint() - self.drag_position
-            self.move(new_pos)
-            event.accept()
-    
-    def mouseReleaseEvent(self, event):
-        self.drag_position = None
+        if self.drag_position and event.buttons() & Qt.LeftButton:
+            delta = event.globalPos() - self.drag_position
+            self.move(self.x() + delta.x(), self.y() + delta.y())
+            self.drag_position = event.globalPos()
+
+    def eventFilter(self, obj, evt):
+        if evt.type() == evt.Type.MouseMove and self.drag_position:
+            delta = evt.globalPos() - self.drag_position
+            self.move(self.x() + delta.x(), self.y() + delta.y())
+            self.drag_position = evt.globalPos()
+            return True
+        elif evt.type() == evt.Type.MouseButtonRelease:
+            self.drag_position = None
+            QApplication.instance().removeEventFilter(self)
+            return True
+        return super().eventFilter(obj, evt)
     
     def contextMenuEvent(self, event):
-        """Override right-click to show context menu."""
         menu = QMenu(self)
         
         always_on_top = self.windowFlags() & Qt.WindowStaysOnTopHint
@@ -438,25 +454,17 @@ class MainWindow(QWidget):
         
         menu.popup(event.globalPos())
     
-    def _show_context_menu(self, pos):
-        menu = QMenu(self)
-        
-        always_on_top = self.windowFlags() & Qt.WindowStaysOnTopHint
-        if always_on_top:
-            action = menu.addAction("Disable Always on Top")
-        else:
-            action = menu.addAction("Enable Always on Top")
-        
-        action.triggered.connect(self._toggle_always_on_top)
-        
-        menu.exec(pos.x(), pos.y())
-    
     def _toggle_always_on_top(self):
-        if self.windowFlags() & Qt.WindowStaysOnTopHint:
-            self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+        flags = self.windowFlags()
+        if flags & Qt.WindowStaysOnTopHint:
+            new_flags = flags & ~Qt.WindowStaysOnTopHint
             self.storage.set_always_on_top(False)
         else:
-            self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+            new_flags = flags | Qt.WindowStaysOnTopHint
             self.storage.set_always_on_top(True)
         
+        self.hide()
+        self.setWindowFlags(new_flags)
         self.show()
+        self.activateWindow()
+        self.raise_()

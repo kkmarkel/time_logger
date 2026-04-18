@@ -1,33 +1,58 @@
 ---
-status: resolved
+status: partial
 phase: 01-core-timer
 source: 01-SUMMARY.md, 01-02-SUMMARY.md
 started: 2026-04-18T23:45:00Z
-updated: 2026-04-19T00:25:00Z
+updated: 2026-04-19T16:25:00Z
 ---
 
 ## Current Test
 
-[testing complete]
+number: 10
+name: Drag window
+expected: |
+  Click and drag anywhere on the title bar or content area. Window moves smoothly with the mouse. No focus loss.
 awaiting: user response
 
 ## Tests
 
 ### 1. Launch application
-expected: App launches as a compact frameless window with custom title bar (minimize, close buttons). Title bar shows "Time Logger".
-result: issue
-reported: "It still has a black frame around the window - is that intended?"
-severity: cosmetic
+expected: App launches as a compact frameless window with stylized retrowave gradient title bar (purple/pink/cyan gradient effect), not transparent. Title bar shows "Time Logger".
+result: pass
 
 ## Gaps
 
-All 5 issues have been fixed in plan 01-02:
+- truth: "Stylized retrowave title bar instead of transparent"
+  status: pending
+  reason: "window is fully transparent - wants retrowave style title bar"
+  severity: minor
+  test: 1
+  root_cause: "title_bar uses transparent background-color"
+  missing: "Add retrowave gradient/gradient-style to title bar"
 
-1. **No visible frame/border** (cosmetic, test 1) — Fixed with WA_TranslucentBackground + transparent styles
-2. **Color picker focus** (major, test 4) — Fixed with Qt.Dialog | Qt.WindowStaysOnTopHint
-3. **Window drag** (major, test 10) — Fixed drag calculation using self.pos()
-4. **Context menu** (blocker, test 11) — Fixed with contextMenuEvent override
-5. **Auto-save feedback** (minor, test 15) — Fixed with "SAVED ✓" visual feedback
+- truth: "Color picker has solid background and maintains focus"
+  status: pending
+  reason: "Color picker still has transparent background and loses focus when clicking transparent areas"
+  severity: major
+  test: 4
+  root_cause: "QColorDialog still has transparent parent widget causing focus loss"
+  missing: "Set dialog parent to None or use different approach for solid background"
+
+- truth: "Window draggable via title bar or content area"
+  status: pending_re_test
+  reason: "User reported: no, it does not drag"
+  severity: major
+  test: 10
+  root_cause: "Mouse events intercepted by child widgets; grabMouse() needed"
+  missing: []
+
+- truth: "Always-on-top toggle works after enabling"
+  status: pending_re_test
+  reason: "User reported: It does not stay on top with enabled"
+  severity: major
+  test: 11
+  root_cause: "close() destroys window; use hide()/show() instead"
+  missing: []
   status: resolved
   reason: "It still has a black frame around the window - is that intended?"
   severity: cosmetic
@@ -124,15 +149,13 @@ expected: Click the dropdown arrow to see list of previous activities. Select on
 result: pass
 
 ### 4. Pick color
-expected: Click the color button to open preset colors (8 colors). Click a color to select it. Color button updates to show selected color.
-result: issue
-reported: "The window that appears for color selection has transparent background. That is very inconvenient. Also clicking on it somewhere else other than the colors or buttons - causes the window to go out of focus (the app window disappears). Other than that actual color selection and color presets work."
-severity: major
+expected: Click color button. Color picker opens with solid background (not transparent). Click outside the color buttons/area - picker maintains focus, window doesn't lose focus.
+result: pass
 
 ### 5. Custom color
 expected: Click color button, select a custom color from the Qt color dialog. Custom color is saved with the activity.
 result: issue
-reported: "Same issue as test 4 - transparent background and focus issues"
+reported: "Same issue as test 4 - transparent background and loses focus"
 severity: major
 
 ### 6. Start timer
@@ -152,16 +175,16 @@ expected: Attempt to start timer without entering activity name. Button does not
 result: pass
 
 ### 10. Drag window
-expected: Click and drag anywhere on the title bar or content area to move the window.
+expected: Click and drag anywhere on the title bar or content area. Window moves smoothly with the mouse. No focus loss.
 result: issue
-reported: "Window doesn't drag at all - not on the title nor on the content area"
+reported: "no, it does not drag"
 severity: major
 
 ### 11. Always-on-top toggle
 expected: Right-click anywhere to show context menu. Select "Enable Always on Top" or "Disable Always on Top". Window stays above other windows when enabled.
 result: issue
-reported: "Context menu doesn't show up, and it also prints out an error in the terminal. User suggests using a menu button (three dots) instead of right-click."
-severity: blocker
+reported: "It does not stay on top with enabled"
+severity: major
 
 ### 12. Window position persists
 expected: Move the window to a specific position. Close the app. Reopen app. Window appears in the same position.
@@ -178,15 +201,13 @@ result: pass
 
 ### 15. Close window
 expected: Click the close button (✕) in title bar. If timer is running, auto-saves elapsed time. Window closes.
-result: issue
-reported: "It closed fine, but I do not know if it autosaved the time"
-severity: minor
+result: pass
 
 ## Summary
 
 total: 15
-passed: 8
-issues: 6
+passed: 9
+issues: 1
 pending: 0
 skipped: 1
 skipped: 0
@@ -194,4 +215,14 @@ blocked: 0
 
 ## Gaps
 
-[none yet]
+- truth: "Window draggable via title bar or content area"
+  status: failed
+  reason: "User reported: no, it does not drag"
+  severity: major
+  test: 10
+  root_cause: "Mouse events intercepted by child widgets; multiple fixes attempted (grabMouse, event override, eventFilter) - all failed"
+  artifacts:
+    - path: "ui/main_window.py"
+      issue: "mousePressEvent, mouseMoveEvent, event(), eventFilter all fail to capture mouse events from child widgets"
+  missing: []
+  debug_session: ""
