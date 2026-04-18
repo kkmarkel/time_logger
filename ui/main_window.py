@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QPushButton, QComboBox, QFrame, QGridLayout,
-    QColorDialog, QMenu
+    QColorDialog, QMenu, QToolButton
 )
 from PySide6.QtCore import Qt, QTimer, QPoint, QSize
 from PySide6.QtGui import QColor, QPainter, QPalette
@@ -168,7 +168,7 @@ class MainWindow(QWidget):
         
         self.setStyleSheet("""
             QWidget {
-                background-color: transparent;
+                background-color: #2c3e50;
             }
         """)
     
@@ -194,6 +194,34 @@ class MainWindow(QWidget):
         title_layout.addWidget(title_label)
         
         title_layout.addStretch()
+        
+        self.menu_btn = QToolButton()
+        self.menu_btn.setText("...")
+        self.menu_btn.setFixedSize(24, 20)
+        self.menu_btn.setStyleSheet("""
+            QToolButton {
+                background-color: transparent;
+                color: white;
+                border: none;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            QToolButton:hover {
+                background-color: #34495e;
+            }
+        """)
+        
+        menu = QMenu(self)
+        always_on_top = self.windowFlags() & Qt.WindowStaysOnTopHint
+        if always_on_top:
+            action = menu.addAction("Disable Always on Top")
+        else:
+            action = menu.addAction("Enable Always on Top")
+        action.triggered.connect(self._toggle_always_on_top)
+        
+        self.menu_btn.setMenu(menu)
+        
+        title_layout.addWidget(self.menu_btn)
         
         self.min_btn = QPushButton("─")
         self.min_btn.setFixedSize(24, 20)
@@ -260,21 +288,13 @@ class MainWindow(QWidget):
         self.color_btn.set_color(color)
     
     def _pick_color(self):
-        for preset in PRESET_COLORS:
-            if self.current_activity_color == preset:
-                color = QColorDialog.getColor(
-                    QColor(preset), self, "Select Color"
-                )
-                if color.isValid():
-                    self.current_activity_color = color.name()
-                    self.color_btn.set_color(self.current_activity_color)
-                return
+        dialog = QColorDialog(self)
+        dialog.setWindowTitle("Select Color")
+        dialog.setCurrentColor(QColor(self.current_activity_color))
+        dialog.setOption(QColorDialog.DontUseNativeDialog)
         
-        color = QColorDialog.getColor(
-            QColor(self.current_activity_color), self, "Select Color"
-        )
-        if color.isValid():
-            self.current_activity_color = color.name()
+        if dialog.exec():
+            self.current_activity_color = dialog.currentColor().name()
             self.color_btn.set_color(self.current_activity_color)
     
     def _toggle_timer(self):
