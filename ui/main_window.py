@@ -62,6 +62,7 @@ class MainWindow(QWidget):
         self._restore_window_state()
     
     def _init_ui(self):
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setMinimumSize(280, 180)
         
@@ -168,7 +169,7 @@ class MainWindow(QWidget):
         
         self.setStyleSheet("""
             QWidget {
-                background-color: #2c3e50;
+                background-color: transparent;
             }
         """)
     
@@ -176,7 +177,7 @@ class MainWindow(QWidget):
         title_bar = QFrame()
         title_bar.setStyleSheet("""
             QFrame {
-                background-color: #2c3e50;
+                background-color: transparent;
                 border-radius: 8px 8px 0 0;
             }
         """)
@@ -292,6 +293,7 @@ class MainWindow(QWidget):
         dialog.setWindowTitle("Select Color")
         dialog.setCurrentColor(QColor(self.current_activity_color))
         dialog.setOption(QColorDialog.DontUseNativeDialog)
+        dialog.setWindowFlags(Qt.Dialog | Qt.WindowStaysOnTopHint)
         
         if dialog.exec():
             self.current_activity_color = dialog.currentColor().name()
@@ -388,26 +390,53 @@ class MainWindow(QWidget):
     def _close_app(self):
         if self.running and self.elapsed_seconds > 0:
             self.storage.add_time(self.current_activity_name, self.elapsed_seconds)
+            self.timer_label.setStyleSheet("""
+                QLabel {
+                    font-family: 'Consolas', 'Monaco', monospace;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #27ae60;
+                    padding: 8px 16px;
+                }
+            """)
+            self.timer_label.setText("SAVED ✓")
+        else:
+            self.timer_label.setText("CLOSED")
         
+        QTimer.singleShot(400, self._execute_close)
+    
+    def _execute_close(self):
         pos = self.pos()
         self.storage.set_window_position(pos.x(), pos.y())
-        
         self.close()
     
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            self.drag_position = event.globalPosition().toPoint() - self.pos()
             event.accept()
-        elif event.button() == Qt.RightButton:
-            self._show_context_menu(event.globalPosition())
     
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton and self.drag_position:
-            self.move(event.globalPosition().toPoint() - self.drag_position)
+        if event.buttons() & Qt.LeftButton and self.drag_position:
+            new_pos = event.globalPosition().toPoint() - self.drag_position
+            self.move(new_pos)
             event.accept()
     
     def mouseReleaseEvent(self, event):
         self.drag_position = None
+    
+    def contextMenuEvent(self, event):
+        """Override right-click to show context menu."""
+        menu = QMenu(self)
+        
+        always_on_top = self.windowFlags() & Qt.WindowStaysOnTopHint
+        if always_on_top:
+            action = menu.addAction("Disable Always on Top")
+        else:
+            action = menu.addAction("Enable Always on Top")
+        
+        action.triggered.connect(self._toggle_always_on_top)
+        
+        menu.popup(event.globalPos())
     
     def _show_context_menu(self, pos):
         menu = QMenu(self)
