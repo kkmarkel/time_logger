@@ -35,6 +35,10 @@
 
 **Summary:** PySide6 timer with frameless window, activity input, color picker, HH:MM:SS timer, play/stop toggle
 
+**Plans:**
+- [x] 01-01-PLAN.md — Initial implementation (complete)
+- [x] 01-02-PLAN.md — UAT gap fixes (complete)
+
 ---
 
 ## Phase 2: Data & Display

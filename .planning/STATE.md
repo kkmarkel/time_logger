@@ -41,4 +41,4 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 ---
 
-*State updated: 2026-04-18*
+*State updated: 2026-04-19*
