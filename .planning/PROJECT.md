@@ -16,16 +16,11 @@ Enable personal productivity by helping users understand where their time goes t
 
 ### Active
 
-- [ ] Fixed desktop position — app stays where placed on Windows desktop
-- [ ] Activity name input with color selection
-- [ ] Activity selection from previously logged activities
-- [ ] Start/stop timer button with live display (HH:MM)
-- [ ] Cumulative time tracking per activity
-- [ ] Visual bar representation of time amounts
-- [ ] Clear all recordings
-- [ ] Clear last recording
+- [ ] Tauri-based desktop app (rebuild from scratch)
+- [ ] Animated main window UI
+- [ ] Timer with activity tracking (core logic ported)
+- [ ] Cumulative time display with visual bars
 - [ ] JSON file persistence between restarts
-- [ ] Manual app start
 
 ### Out of Scope
 
@@ -37,23 +32,27 @@ Enable personal productivity by helping users understand where their time goes t
 ## Context
 
 - Platform: Windows desktop
-- Tech stack: PySide6 (Python Qt bindings)
+- Tech stack: Tauri (Rust backend + frontend)
 - Storage: JSON file (user preference)
 - Primary use: Personal productivity/time awareness
+- Status: Pivot from PySide6 to Tauri - rebuilding UI
+- Preserved: Storage logic (JSON file handling)
 
 ## Constraints
 
 - **Platform**: Windows desktop only — fixed position on screen
 - **Persistence**: JSON file in user's app data directory
-- **Stack**: PySide6 — user preference over Electron/Tauri
+- **Stack**: Tauri (Rust + WebView) — NEW DIRECTION as of 2026-04-19
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|---------|---------|
-| PySide6 stack | User preference for desktop Qt apps | — Pending |
+| Tauri stack | Switch from PySide6 for modern web tech | — Pending |
 | JSON storage | Simple, human-readable, easy to backup | — Pending |
 | Weekly reports | User requested over daily totals | — Pending |
+| Animated main window | NEW: Main window with transition animations | — Pending |
+| UI redesign | UI approach flawed - new direction | — Pending |
 
 ## Evolution
 
@@ -76,4 +75,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-18 after initialization*
+*Last updated: 2026-04-19 after pivot to Tauri*
