@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "/home/kkmarkel/git-kkmarkel/time_logger/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "/home/kkmarkel/git-kkmarkel/time_logger/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
