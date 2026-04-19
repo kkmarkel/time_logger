@@ -38,7 +38,7 @@
 
 **Plan list:**
 - [x] 01-01-PLAN.md — Initialize Tauri project with Svelte frontend
-- [ ] 01-02-PLAN.md — Close TAURI-02/TAURI-03 verification gaps with prerequisite + build evidence
+- [x] 01-02-PLAN.md — Close TAURI-02/TAURI-03 verification gaps with prerequisite + build evidence
 
 ---
 
