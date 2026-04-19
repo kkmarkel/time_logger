@@ -222,6 +222,7 @@ Thumbs.db
 !.env.example
 node_modules/
 .next/
+.svelte-kit/
 *.pyc
 .venv/
 vendor/
