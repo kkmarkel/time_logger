@@ -34,10 +34,11 @@
 2. Empty window displays
 3. `npm run tauri build` produces .exe
 
-**Plans:** 1 plan
+**Plans:** 2 plans
 
 **Plan list:**
 - [x] 01-01-PLAN.md — Initialize Tauri project with Svelte frontend
+- [ ] 01-02-PLAN.md — Close TAURI-02/TAURI-03 verification gaps with prerequisite + build evidence
 
 ---
 
