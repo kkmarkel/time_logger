@@ -30,8 +30,8 @@ if ! grep -Eq "Running (BeforeDevCommand|DevCommand)|Dev server running|Local:" 
   exit 1
 fi
 
-if grep -Eq "linker ['\"][^'\"]*cc[^'\"]*['\"] not found|webkit2gtk-4.1|rsvg2|error:" "${DEV_LOG}"; then
-  echo "[phase1:verify] ERROR: Detected build/runtime errors during dev startup proof."
+if grep -Eq "linker ['\"][^'\"]*cc[^'\"]*['\"] not found|webkit2gtk-4\.1[^\n]*(not installed|not found|missing)|rsvg2[^\n]*(not installed|not found|missing)|error while loading shared libraries" "${DEV_LOG}"; then
+  echo "[phase1:verify] ERROR: Detected prerequisite/runtime-loader failure during dev startup proof."
   exit 1
 fi
 

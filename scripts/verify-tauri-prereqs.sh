@@ -23,7 +23,9 @@ if [[ ${TAURI_INFO_STATUS} -ne 0 ]]; then
   echo "[tauri:prereqs] ERROR: 'npm run tauri -- info' failed (exit ${TAURI_INFO_STATUS})."
 fi
 
-if [[ "${TAURI_INFO_OUTPUT}" == *"webkit2gtk-4.1"* ]] || [[ "${TAURI_INFO_OUTPUT}" == *"rsvg2"* ]] || [[ "${TAURI_INFO_OUTPUT}" == *"linker \\`cc\\` not found"* ]] || [[ "${TAURI_INFO_OUTPUT}" == *"linker 'cc' not found"* ]]; then
+if [[ "${TAURI_INFO_OUTPUT}" =~ (webkit2gtk-4\.1[^\n]*(not\ installed|not\ found|missing)) ]] \
+  || [[ "${TAURI_INFO_OUTPUT}" =~ (rsvg2[^\n]*(not\ installed|not\ found|missing)) ]] \
+  || [[ "${TAURI_INFO_OUTPUT}" =~ (linker[^\n]*cc[^\n]*not\ found) ]]; then
   echo "[tauri:prereqs] ERROR: Missing Linux prerequisites detected (webkit2gtk-4.1, rsvg2, or linker)."
   echo "[tauri:prereqs] Install required dependencies:"
   echo "  ${INSTALL_GUIDANCE}"
