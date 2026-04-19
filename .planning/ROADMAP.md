@@ -34,6 +34,11 @@
 2. Empty window displays
 3. `npm run tauri build` produces .exe
 
+**Plans:** 1 plan
+
+**Plan list:**
+- [x] 01-01-PLAN.md — Initialize Tauri project with Svelte frontend
+
 ---
 
 ## Phase 2: Timer Core

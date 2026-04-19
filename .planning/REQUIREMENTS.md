@@ -10,7 +10,7 @@
 
 ### Tauri Setup
 
-- [ ] **TAURI-01**: Initialize Tauri project with npm create tauri-app
+- [x] **TAURI-01**: Initialize Tauri project with npm create tauri-app
 - [ ] **TAURI-02**: Dev server runs without errors
 - [ ] **TAURI-03**: Production .exe builds successfully
 
@@ -45,7 +45,7 @@
 
 | Requirement | Phase | Status |
 |--------------|-------|--------|
-| TAURI-01 | Phase 1 | Pending |
+| TAURI-01 | Phase 1 | Complete |
 | TAURI-02 | Phase 1 | Pending |
 | TAURI-03 | Phase 1 | Pending |
 | TIMER-01 | Phase 2 | Pending |
